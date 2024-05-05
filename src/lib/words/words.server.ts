@@ -10,6 +10,9 @@ type Word = {
   variety: 'p1' | 'p2' | 'p3' | 'm1' | 'm2' | 'm3';
   value: string;
   createdAt: Date;
+  lastAnswer: { date: Date; isGood: boolean };
+  sumOfGood: number;
+  sumOfBad: number;
 };
 
 export async function createWords(fileName: string) {
