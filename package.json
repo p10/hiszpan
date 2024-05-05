@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "scripts": {
     "dev": "vite dev",
+    "start": "npm run build && node build",
     "build": "vite build",
     "preview": "vite preview",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
@@ -30,5 +31,8 @@
     "typescript": "^5.0.0",
     "vite": "^5.0.3"
   },
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "zx": "^8.0.2"
+  }
 }
