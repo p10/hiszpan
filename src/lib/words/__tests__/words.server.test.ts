@@ -1,41 +1,63 @@
 import { beforeEach, expect, test } from 'vitest';
-import { createWords } from '../words.server';
+import { createWords, type Word } from '../words.server';
 import { fs } from 'zx';
 
-const path = `${process.cwd()}/data/db-tests.json`;
+const filename = 'db-tests.json';
+const path = `${process.cwd()}/data/${filename}`;
 let words: Awaited<ReturnType<typeof createWords>>;
+
+async function wordsFromFile() {
+  const d = (await fs.readJson(path)) as { words: Word[] };
+  return d.words;
+}
 
 beforeEach(async () => {
   await fs.ensureFile(path);
   await fs.writeFile(path, '', { encoding: 'utf-8' });
-  words = await createWords('db-tests.json');
+  words = await createWords(filename);
 });
 
 test('add', async () => {
-  const res = await words.add({
-    polish: 'pić',
-    espanol: 'beber',
-    variety: 'p1',
-    value: 'bebo',
-  });
+  const res = await words.add({ name: 'beber', variety: 'p1', value: 'bebo' });
 
   expect(res).toBe(undefined);
   expect(words.list().length).toEqual(1);
 });
 
 test('add aleready exists', async () => {
-  await words.add({
-    polish: 'pić',
-    espanol: 'beber',
-    variety: 'p1',
-    value: 'bebo',
-  });
-  const res = await words.add({
-    polish: 'dupa',
-    espanol: 'beber',
-    variety: 'p1',
-    value: 'elo',
-  });
-  expect(res?.type).toEqual('AlreadyExists');
+  await words.add({ name: 'a', variety: 'p1', value: 'a' });
+
+  await expect(() =>
+    words.add({ name: 'a', variety: 'p1', value: 'a' }),
+  ).rejects.toThrow();
+
   expect(words.list().length).toEqual(1);
+});
+
+test('answer good', async () => {
+  await words.add({ name: 'a', variety: 'p1', value: 'a' });
+  await words.add({ name: 'b', variety: 'p1', value: 'b' });
+
+  await words.answer({ name: 'a', variety: 'p1' }, 'a');
+
+  const w = await wordsFromFile();
+  expect(w[0].lastAnswer?.isGood).toEqual(true);
+  expect(w[0].sumOfGood).toEqual(1);
+});
+
+test('answer bad', async () => {
+  await words.add({ name: 'a', variety: 'p1', value: 'a' });
+  await words.add({ name: 'b', variety: 'p1', value: 'b' });
+
+  await words.answer({ name: 'a', variety: 'p1' }, 'bad');
+
+  const w = await wordsFromFile();
+  expect(w[0].lastAnswer?.isGood).toEqual(false);
+  expect(w[0].sumOfBad).toEqual(1);
+});
+
+test('answer for not exsiting word', async () => {
+  await expect(() =>
+    words.answer({ name: 'a', variety: 'p1' }, 'a'),
+  ).rejects.toThrow();
 });
