@@ -33,6 +33,7 @@
   },
   "type": "module",
   "dependencies": {
+    "zod": "^3.23.6",
     "zx": "^8.0.2"
   }
 }
