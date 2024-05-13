@@ -1,11 +1,10 @@
 import { createWords } from '$lib/words/words.server';
+import type { Actions } from './$types';
 
 const words = await createWords('db.json');
 
-// words.add({
-//   polish: 'kurwa',
-//   espanol: 'curve',
-//   variety: 'p1',
-//   value: 'curvie',
-// });
-console.log(JSON.stringify(words.list(), null, 2));
+export const actions = {
+  default: async () => {
+    // TODO:
+  },
+} satisfies Actions;

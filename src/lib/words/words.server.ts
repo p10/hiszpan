@@ -1,19 +1,33 @@
 import { fs } from 'zx';
 import { z } from 'zod';
 
+const MIN_MESSAGE = { message: 'Musi zawierać conajmniej 2 litery' };
+
 type Data = {
   words: Word[];
 };
 
-const InputWordSchema = z.object({
-  name: z.string().min(2, { message: 'Musi zawierać conajmniej 2 litery' }),
-  variety: z.enum(['p1', 'p2', 'p3', 'm1', 'm2', 'm3']),
-  value: z.string().min(2, { message: 'Musi zawierać conajmniej 2 litery' }),
+export const inputWordsComboSchema = z.object({
+  name: z.string().min(2, MIN_MESSAGE),
+  p1: z.string().min(2, MIN_MESSAGE),
+  p2: z.string().min(2, MIN_MESSAGE),
+  p3: z.string().min(2, MIN_MESSAGE),
+  m1: z.string().min(2, MIN_MESSAGE),
+  m2: z.string().min(2, MIN_MESSAGE),
+  m3: z.string().min(2, MIN_MESSAGE),
 });
 
-type InputWord = z.infer<typeof InputWordSchema>;
+type InputWordsCombo = z.infer<typeof inputWordsComboSchema>;
 
-export type Word = InputWord & {
+type Variety = keyof Omit<InputWordsCombo, 'name'>;
+
+type InputWord = {
+  name: string;
+  value: string;
+  variety: Variety;
+};
+
+type Word = InputWord & {
   createdAt: string;
   lastAnswer?: { date: string; isGood: boolean };
   sumOfGood: number;
@@ -33,6 +47,28 @@ export async function createWords(fileName: string) {
   }
 
   return {
+    async addCombo(input: InputWordsCombo) {
+      const newWords = Object.keys(input)
+        .filter((key) => key !== 'name')
+        .map<Word>((key) => {
+          // TODO: może guard który wywala błąd gdy string nie jest variety?
+          return {
+            name: input.name,
+            variety: key as Variety,
+            value: input[key as Variety],
+            sumOfBad: 0,
+            sumOfGood: 0,
+            createdAt: dateToISOLikeButLocal(new Date()),
+          };
+        });
+      const someExists = newWords.some(
+        (word) => findById(data.words, word) !== undefined,
+      );
+      if (someExists) {
+        throw new Error(`Word "${input.name}" already exists`);
+      }
+      await updateWords([...data.words, ...newWords]);
+    },
     async add(input: InputWord) {
       if (findById(data.words, input) !== undefined) {
         throw new Error('word already exists');
@@ -44,7 +80,7 @@ export async function createWords(fileName: string) {
         createdAt: dateToISOLikeButLocal(new Date()),
       };
       await updateWords([...data.words, word]);
-      return undefined;
+      return word;
     },
 
     async answer(id: Id, ans: string) {
