@@ -36,18 +36,29 @@ type Word = InputWord & {
 
 type Id = Pick<Word, 'name' | 'variety'>;
 
-export async function createWords(fileName: string) {
-  let data = await readFile(fileName);
+type Instance = ReturnType<typeof create>;
 
+const instances = new Map<string, Instance>();
+
+export function createWords(filename: string): Instance {
+  const i = instances.get(filename);
+  if (!i) {
+    const words = create(filename);
+    instances.set(filename, words);
+    return words;
+  }
+  return i;
+}
+
+function create(filename: string) {
   async function updateWords(words: Word[]) {
-    data = {
-      words,
-    };
-    await saveFile(fileName, data);
+    const data = await readFile(filename);
+    await saveFile(filename, { ...data, words });
   }
 
   return {
     async addCombo(input: InputWordsCombo) {
+      const data = await readFile(filename);
       const newWords = Object.keys(input)
         .filter((key) => key !== 'name')
         .map<Word>((key) => {
@@ -69,7 +80,9 @@ export async function createWords(fileName: string) {
       }
       await updateWords([...data.words, ...newWords]);
     },
+
     async add(input: InputWord) {
+      const data = await readFile(filename);
       if (findById(data.words, input) !== undefined) {
         throw new Error('word already exists');
       }
@@ -84,6 +97,7 @@ export async function createWords(fileName: string) {
     },
 
     async answer(id: Id, ans: string) {
+      const data = await readFile(filename);
       if (findById(data.words, id) === undefined) {
         throw new Error('word does not exists');
       }
@@ -105,7 +119,12 @@ export async function createWords(fileName: string) {
       await updateWords(updatedWords);
     },
 
-    list() {
+    /**
+     * @deprecated
+     *  jeszcze nie jest używane
+     */
+    async list() {
+      const data = await readFile(filename);
       return data.words;
     },
   };
@@ -127,23 +146,23 @@ function findById(list: Word[], id: Id) {
   return list.find(sameId(id));
 }
 
-async function readFile(fileName: string): Promise<Data> {
-  await fs.ensureFile(filePath(fileName));
+async function readFile(filename: string): Promise<Data> {
+  await fs.ensureFile(filePath(filename));
   try {
-    return await fs.readJson(filePath(fileName));
+    return await fs.readJson(filePath(filename));
   } catch (e) {
     const data = init();
-    await saveFile(fileName, data);
+    await saveFile(filename, data);
     return data;
   }
 }
 
-async function saveFile(fileName: string, data: Data) {
-  return fs.writeJson(filePath(fileName), data);
+async function saveFile(filename: string, data: Data) {
+  return fs.writeJson(filePath(filename), data);
 }
 
-function filePath(fileName: string) {
-  return `${process.cwd()}/data/${fileName}`;
+function filePath(filename: string) {
+  return `${process.cwd()}/data/${filename}`;
 }
 
 // produces iso like format '2024-05-06T12:14:10' but for local time

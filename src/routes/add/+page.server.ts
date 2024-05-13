@@ -3,7 +3,7 @@ import { fail } from '@sveltejs/kit';
 import type { Actions } from './$types';
 import { formFields } from '$lib/form';
 
-const words = await createWords('db.json');
+const words = createWords('db.json');
 
 export const actions = {
   default: async ({ request }) => {

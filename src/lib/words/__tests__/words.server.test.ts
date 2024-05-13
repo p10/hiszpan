@@ -4,7 +4,7 @@ import { fs } from 'zx';
 
 const filename = 'db-tests.json';
 const path = `${process.cwd()}/data/${filename}`;
-let words: Awaited<ReturnType<typeof createWords>>;
+let words: ReturnType<typeof createWords>;
 
 async function wordsFromFile() {
   const d = (await fs.readJson(path)) as { words: Word[] };
@@ -14,14 +14,18 @@ async function wordsFromFile() {
 beforeEach(async () => {
   await fs.ensureFile(path);
   await fs.writeFile(path, '', { encoding: 'utf-8' });
-  words = await createWords(filename);
+  words = createWords(filename);
 });
 
 test('add', async () => {
   const res = await words.add({ name: 'beber', variety: 'p1', value: 'bebo' });
 
-  expect(res).toBe(undefined);
-  expect(words.list().length).toEqual(1);
+  expect(res).toMatchObject({
+    name: 'beber',
+    sumOfBad: 0,
+    sumOfGood: 0,
+  });
+  expect((await wordsFromFile()).length).toEqual(1);
 });
 
 test('add aleready exists', async () => {
@@ -31,7 +35,7 @@ test('add aleready exists', async () => {
     words.add({ name: 'a', variety: 'p1', value: 'a' }),
   ).rejects.toThrow();
 
-  expect(words.list().length).toEqual(1);
+  expect((await wordsFromFile()).length).toEqual(1);
 });
 
 test('answer good', async () => {
