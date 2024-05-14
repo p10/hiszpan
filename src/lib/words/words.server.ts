@@ -119,6 +119,13 @@ function create(filename: string) {
       await updateWords(updatedWords);
     },
 
+    async random() {
+      const { words } = await readFile(filename);
+      // TODO: algorytm wybierania słowa do odgadnięcia
+      // może po prostu posortować po kliku polach
+      // albo podzielić listę na parę grup
+    },
+
     /**
      * @deprecated
      *  jeszcze nie jest używane
