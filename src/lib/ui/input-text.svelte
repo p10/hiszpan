@@ -4,11 +4,17 @@
     name: string;
     placeholder: string;
     form: { fields: Fields } | null;
+    focus?: boolean;
   };
-  const { name, placeholder, form }: Props = $props();
+  let elem: HTMLInputElement;
+  const { name, placeholder, form, focus }: Props = $props();
+  $effect(() => {
+    focus && elem.focus();
+  });
 </script>
 
 <input
+  bind:this={elem}
   type="text"
   {name}
   {placeholder}

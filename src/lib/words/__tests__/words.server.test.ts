@@ -4,17 +4,21 @@ import { fs } from 'zx';
 
 const filename = 'db-tests.json';
 const path = `${process.cwd()}/data/${filename}`;
-let words: ReturnType<typeof createWords>;
+// let words: ReturnType<typeof createWords>;
+const words = createWords(filename);
 
 async function wordsFromFile() {
   const d = (await fs.readJson(path)) as { words: Word[] };
   return d.words;
 }
 
+async function writeWords(words: Word[]) {
+  await fs.writeJson(path, { words });
+}
+
 beforeEach(async () => {
   await fs.ensureFile(path);
   await fs.writeFile(path, '', { encoding: 'utf-8' });
-  words = createWords(filename);
 });
 
 test('add', async () => {
@@ -64,4 +68,93 @@ test('answer for not exsiting word', async () => {
   await expect(() =>
     words.answer({ name: 'a', variety: 'p1' }, 'a'),
   ).rejects.toThrow();
+});
+
+test('word for guessing based on sums', async () => {
+  await writeWords([
+    {
+      name: 'a',
+      variety: 'p1',
+      value: 'aa',
+      sumOfBad: 1,
+      sumOfGood: 0,
+      createdAt: '2024-05-13T22:00:00',
+    },
+    {
+      name: 'b',
+      variety: 'p1',
+      value: 'bb',
+      sumOfBad: 0,
+      sumOfGood: 0,
+      createdAt: '2024-05-13T22:00:00',
+    },
+  ]);
+  const word = await words.wordForGuessing();
+  expect(word.name).toEqual('b');
+});
+
+test('word for guessing based on empty last answer', async () => {
+  await writeWords([
+    {
+      name: 'a',
+      variety: 'p1',
+      value: 'aa',
+      sumOfBad: 0,
+      sumOfGood: 0,
+      createdAt: '2024-05-13T22:00:00',
+    },
+    {
+      name: 'b',
+      variety: 'p1',
+      value: 'bb',
+      sumOfBad: 0,
+      sumOfGood: 0,
+      createdAt: '2024-05-13T22:00:00',
+    },
+  ]);
+  const word = await words.wordForGuessing();
+  expect(word.name).toEqual('a');
+});
+
+test('word for guessing based on last answer', async () => {
+  await writeWords([
+    {
+      name: 'a',
+      variety: 'p1',
+      value: 'aa',
+      sumOfBad: 1,
+      sumOfGood: 0,
+      lastAnswer: { isGood: true, date: '2010-05-13T22:00:00' },
+      createdAt: '2024-05-13T22:00:00',
+    },
+    {
+      name: 'b',
+      variety: 'p1',
+      value: 'aa',
+      sumOfBad: 1,
+      sumOfGood: 0,
+      lastAnswer: { isGood: true, date: '2020-05-13T22:00:00' },
+      createdAt: '2024-05-13T22:00:00',
+    },
+    {
+      name: 'd',
+      variety: 'p1',
+      value: 'aa',
+      sumOfBad: 1,
+      sumOfGood: 0,
+      lastAnswer: { isGood: true, date: '1999-05-13T22:00:00' },
+      createdAt: '2024-05-13T22:00:00',
+    },
+    {
+      name: 'c',
+      variety: 'p1',
+      value: 'bb',
+      sumOfBad: 1,
+      sumOfGood: 0,
+      lastAnswer: { isGood: true, date: '2000-05-13T22:00:00' },
+      createdAt: '2024-05-13T22:00:00',
+    },
+  ]);
+  const word = await words.wordForGuessing();
+  expect(word.name).toEqual('d');
 });

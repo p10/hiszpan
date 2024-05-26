@@ -1,5 +1,6 @@
 import { fs } from 'zx';
 import { z } from 'zod';
+import type { Variety, Word } from './types';
 
 const MIN_MESSAGE = { message: 'Musi zawierać conajmniej 2 litery' };
 
@@ -19,19 +20,10 @@ export const inputWordsComboSchema = z.object({
 
 type InputWordsCombo = z.infer<typeof inputWordsComboSchema>;
 
-type Variety = keyof Omit<InputWordsCombo, 'name'>;
-
 type InputWord = {
   name: string;
   value: string;
   variety: Variety;
-};
-
-type Word = InputWord & {
-  createdAt: string;
-  lastAnswer?: { date: string; isGood: boolean };
-  sumOfGood: number;
-  sumOfBad: number;
 };
 
 type Id = Pick<Word, 'name' | 'variety'>;
@@ -96,34 +88,70 @@ function create(filename: string) {
       return word;
     },
 
-    async answer(id: Id, ans: string) {
+    async answer(id: Id, ans: string): Promise<boolean> {
       const data = await readFile(filename);
-      if (findById(data.words, id) === undefined) {
+      const word = findById(data.words, id);
+      if (word === undefined) {
         throw new Error('word does not exists');
       }
-      const updatedWords = data.words.map((w) => {
-        if (!sameId(id)(w)) {
-          return w;
-        }
-        const isGood = w.value === ans;
-        return {
-          ...w,
-          lastAnswer: {
-            date: dateToISOLikeButLocal(new Date()),
-            isGood,
-          },
-          sumOfGood: isGood ? w.sumOfGood + 1 : w.sumOfGood,
-          sumOfBad: !isGood ? w.sumOfBad + 1 : w.sumOfBad,
-        };
-      });
-      await updateWords(updatedWords);
+      const isGood = word.value === ans;
+      const updatedWord = {
+        ...word,
+        lastAnswer: {
+          date: dateToISOLikeButLocal(new Date()),
+          isGood,
+        },
+        sumOfGood: isGood ? word.sumOfGood + 1 : word.sumOfGood,
+        sumOfBad: !isGood ? word.sumOfBad + 1 : word.sumOfBad,
+      };
+      const updated = data.words.map((w) => (sameId(w, id) ? updatedWord : w));
+      await updateWords(updated);
+      return isGood;
     },
 
-    async random() {
+    async getById(id: Id): Promise<Word> {
       const { words } = await readFile(filename);
-      // TODO: algorytm wybierania słowa do odgadnięcia
-      // może po prostu posortować po kliku polach
-      // albo podzielić listę na parę grup
+      const word = findById(words, id);
+      if (!word) {
+        throw new Error(`No word for id ${id}`);
+      }
+      return word;
+    },
+
+    async wordForGuessing(select: (n: number) => number): Promise<Word> {
+      const { words } = await readFile(filename);
+      if (words.length === 0) {
+        throw new Error('there is no words in database');
+      }
+
+      // not empty array of words not gussed correctly or new words
+      const lessPopularWords = words.reduce<Word[]>((acc, word) => {
+        const added = acc[0];
+        if (!added) {
+          return [word];
+        }
+        if (word.sumOfGood < added.sumOfGood) {
+          return [word];
+        }
+        if (word.sumOfGood === added.sumOfGood) {
+          return acc.concat(word);
+        }
+        return acc;
+      }, []);
+
+      lessPopularWords.sort((a, b) => {
+        const atime = lastAnswerTimestamp(a);
+        const btime = lastAnswerTimestamp(b);
+        if (atime < btime) {
+          // oldest first
+          return -1;
+        } else if (atime > btime) {
+          return 1;
+        }
+        return 0;
+      });
+
+      return words[select(lessPopularWords.length)];
     },
 
     /**
@@ -143,15 +171,16 @@ function init(): Data {
   };
 }
 
-function sameId(id1: Id) {
-  return (id2: Id) => {
-    return id1.name === id2.name && id1.variety === id2.variety;
-  };
+function sameId(id1: Id, id2: Id) {
+  return id1.name === id2.name && id1.variety === id2.variety;
 }
 
 function findById(list: Word[], id: Id) {
-  return list.find(sameId(id));
+  return list.find((el) => sameId(el, id));
 }
+
+const lastAnswerTimestamp = (w: Word) =>
+  w.lastAnswer?.date ? new Date(w.lastAnswer.date).getTime() : 0;
 
 async function readFile(filename: string): Promise<Data> {
   await fs.ensureFile(filePath(filename));

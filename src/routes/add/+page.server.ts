@@ -1,7 +1,7 @@
 import { createWords, inputWordsComboSchema } from '$lib/words/words.server';
 import { fail } from '@sveltejs/kit';
 import type { Actions } from './$types';
-import { formFields } from '$lib/form';
+import { fieldsWithIssues } from '$lib/form';
 
 const words = createWords('db.json');
 
@@ -18,19 +18,25 @@ export const actions = {
       m3: data.get('m3'),
     };
 
-    const parseRes = inputWordsComboSchema.safeParse(input);
-    if (!parseRes.success) {
+    const parsed = inputWordsComboSchema.safeParse(input);
+    if (!parsed.success) {
       return fail(400, {
-        fields: formFields(input, parseRes.error?.issues ?? []),
+        fields: fieldsWithIssues(input, parsed.error?.issues ?? []),
       });
     }
 
     try {
-      await words.addCombo(parseRes.data);
+      await words.addCombo(parsed.data);
     } catch (err) {
       console.error(err);
-      return { fields: formFields(input, []), error: (err as Error).message };
+      return {
+        fields: fieldsWithIssues(input, []),
+        error: (err as Error).message,
+      };
     }
-    return { fields: formFields(input, [], { empty: true }), success: true };
+    return {
+      fields: fieldsWithIssues(input, [], { empty: true }),
+      success: true,
+    };
   },
 } satisfies Actions;

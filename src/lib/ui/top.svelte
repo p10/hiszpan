@@ -8,7 +8,7 @@
 <header class="container">
   <nav>
     <ul>
-      <li class:active={active === 'start'}><a href="/">Start</a></li>
+      <li class:active={active === 'start'}><a href="/">Zgaduj</a></li>
       <li class:active={active === 'add'}><a href="/add">Dodaj</a></li>
     </ul>
   </nav>

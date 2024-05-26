@@ -8,7 +8,7 @@ export type Fields = Record<
   }
 >;
 
-export function formFields(
+export function fieldsWithIssues(
   input: Record<string, FormDataEntryValue | null>,
   issues: ZodIssue[],
   options: { empty?: boolean } = {},
@@ -21,6 +21,23 @@ export function formFields(
       [key]: {
         value: empty ? '' : input[key]?.toString() ?? '',
         error: issue ? issue.message : undefined,
+      },
+    };
+  }, {});
+}
+
+export function fieldsCustom(
+  input: Record<string, FormDataEntryValue | null>,
+  errors: Record<string, string>,
+  options: { empty?: boolean } = {},
+): Fields {
+  const { empty } = { ...{ empty: false }, ...options };
+  return Object.keys(input).reduce<Fields>((acc, key) => {
+    return {
+      ...acc,
+      [key]: {
+        value: empty ? '' : input[key]?.toString() ?? '',
+        error: errors[key],
       },
     };
   }, {});
