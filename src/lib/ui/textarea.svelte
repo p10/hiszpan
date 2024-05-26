@@ -1,25 +1,18 @@
 <script lang="ts">
   import type { Fields } from '../form';
-  import ErrorText from './error-text.svelte';
   type Props = {
     name: string;
     placeholder: string;
     form: { fields: Fields } | null;
-    focus?: boolean;
   };
-  let elem: HTMLInputElement;
-  const { name, placeholder, form, focus }: Props = $props();
-  $effect(() => {
-    focus && elem.focus();
-  });
+  const { name, placeholder, form }: Props = $props();
 </script>
 
-<input
-  bind:this={elem}
-  type="text"
-  {name}
+<textarea
   {placeholder}
   value={form?.fields[name].value || ''}
   aria-invalid={form?.fields[name].error ? 'true' : undefined}
-/>
-<ErrorText {name} {form} />
+></textarea>
+{#if form?.fields[name].error}
+  <small>{form?.fields[name].error}</small>
+{/if}

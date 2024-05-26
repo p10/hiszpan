@@ -1,5 +1,6 @@
 import { beforeEach, expect, test } from 'vitest';
-import { createWords, type Word } from '../words.server';
+import type { Word } from '../types';
+import { createWords } from '../words.server';
 import { fs } from 'zx';
 
 const filename = 'db-tests.json';
@@ -22,7 +23,7 @@ beforeEach(async () => {
 });
 
 test('add', async () => {
-  const res = await words.add({ name: 'beber', variety: 'p1', value: 'bebo' });
+  const res = await words.add({ name: 'beber', variant: 'p1', value: 'bebo' });
 
   expect(res).toMatchObject({
     name: 'beber',
@@ -33,20 +34,20 @@ test('add', async () => {
 });
 
 test('add aleready exists', async () => {
-  await words.add({ name: 'a', variety: 'p1', value: 'a' });
+  await words.add({ name: 'a', variant: 'p1', value: 'a' });
 
   await expect(() =>
-    words.add({ name: 'a', variety: 'p1', value: 'a' }),
+    words.add({ name: 'a', variant: 'p1', value: 'a' }),
   ).rejects.toThrow();
 
   expect((await wordsFromFile()).length).toEqual(1);
 });
 
 test('answer good', async () => {
-  await words.add({ name: 'a', variety: 'p1', value: 'a' });
-  await words.add({ name: 'b', variety: 'p1', value: 'b' });
+  await words.add({ name: 'a', variant: 'p1', value: 'a' });
+  await words.add({ name: 'b', variant: 'p1', value: 'b' });
 
-  await words.answer({ name: 'a', variety: 'p1' }, 'a');
+  await words.answer({ name: 'a', variant: 'p1' }, 'a');
 
   const w = await wordsFromFile();
   expect(w[0].lastAnswer?.isGood).toEqual(true);
@@ -54,10 +55,10 @@ test('answer good', async () => {
 });
 
 test('answer bad', async () => {
-  await words.add({ name: 'a', variety: 'p1', value: 'a' });
-  await words.add({ name: 'b', variety: 'p1', value: 'b' });
+  await words.add({ name: 'a', variant: 'p1', value: 'a' });
+  await words.add({ name: 'b', variant: 'p1', value: 'b' });
 
-  await words.answer({ name: 'a', variety: 'p1' }, 'bad');
+  await words.answer({ name: 'a', variant: 'p1' }, 'bad');
 
   const w = await wordsFromFile();
   expect(w[0].lastAnswer?.isGood).toEqual(false);
@@ -66,7 +67,7 @@ test('answer bad', async () => {
 
 test('answer for not exsiting word', async () => {
   await expect(() =>
-    words.answer({ name: 'a', variety: 'p1' }, 'a'),
+    words.answer({ name: 'a', variant: 'p1' }, 'a'),
   ).rejects.toThrow();
 });
 
@@ -74,7 +75,7 @@ test('word for guessing based on sums', async () => {
   await writeWords([
     {
       name: 'a',
-      variety: 'p1',
+      variant: 'p1',
       value: 'aa',
       sumOfBad: 1,
       sumOfGood: 0,
@@ -82,7 +83,7 @@ test('word for guessing based on sums', async () => {
     },
     {
       name: 'b',
-      variety: 'p1',
+      variant: 'p1',
       value: 'bb',
       sumOfBad: 0,
       sumOfGood: 0,
@@ -97,7 +98,7 @@ test('word for guessing based on empty last answer', async () => {
   await writeWords([
     {
       name: 'a',
-      variety: 'p1',
+      variant: 'p1',
       value: 'aa',
       sumOfBad: 0,
       sumOfGood: 0,
@@ -105,7 +106,7 @@ test('word for guessing based on empty last answer', async () => {
     },
     {
       name: 'b',
-      variety: 'p1',
+      variant: 'p1',
       value: 'bb',
       sumOfBad: 0,
       sumOfGood: 0,
@@ -120,7 +121,7 @@ test('word for guessing based on last answer', async () => {
   await writeWords([
     {
       name: 'a',
-      variety: 'p1',
+      variant: 'p1',
       value: 'aa',
       sumOfBad: 1,
       sumOfGood: 0,
@@ -129,7 +130,7 @@ test('word for guessing based on last answer', async () => {
     },
     {
       name: 'b',
-      variety: 'p1',
+      variant: 'p1',
       value: 'aa',
       sumOfBad: 1,
       sumOfGood: 0,
@@ -138,7 +139,7 @@ test('word for guessing based on last answer', async () => {
     },
     {
       name: 'd',
-      variety: 'p1',
+      variant: 'p1',
       value: 'aa',
       sumOfBad: 1,
       sumOfGood: 0,
@@ -147,7 +148,7 @@ test('word for guessing based on last answer', async () => {
     },
     {
       name: 'c',
-      variety: 'p1',
+      variant: 'p1',
       value: 'bb',
       sumOfBad: 1,
       sumOfGood: 0,
@@ -155,6 +156,6 @@ test('word for guessing based on last answer', async () => {
       createdAt: '2024-05-13T22:00:00',
     },
   ]);
-  const word = await words.wordForGuessing();
+  const word = await words.wordForGuessing(() => 0);
   expect(word.name).toEqual('d');
 });

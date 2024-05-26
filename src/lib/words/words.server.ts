@@ -1,6 +1,6 @@
 import { fs } from 'zx';
 import { z } from 'zod';
-import type { Variety, Word } from './types';
+import type { Variant, Word } from './types';
 
 const MIN_MESSAGE = { message: 'Musi zawierać conajmniej 2 litery' };
 
@@ -23,10 +23,10 @@ type InputWordsCombo = z.infer<typeof inputWordsComboSchema>;
 type InputWord = {
   name: string;
   value: string;
-  variety: Variety;
+  variant: Variant;
 };
 
-type Id = Pick<Word, 'name' | 'variety'>;
+type Id = Pick<Word, 'name' | 'variant'>;
 
 type Instance = ReturnType<typeof create>;
 
@@ -54,11 +54,11 @@ function create(filename: string) {
       const newWords = Object.keys(input)
         .filter((key) => key !== 'name')
         .map<Word>((key) => {
-          // TODO: może guard który wywala błąd gdy string nie jest variety?
+          // TODO: może guard który wywala błąd gdy string nie jest variantem?
           return {
             name: input.name,
-            variety: key as Variety,
-            value: input[key as Variety],
+            variant: key as Variant,
+            value: input[key as Variant],
             sumOfBad: 0,
             sumOfGood: 0,
             createdAt: dateToISOLikeButLocal(new Date()),
@@ -172,7 +172,7 @@ function init(): Data {
 }
 
 function sameId(id1: Id, id2: Id) {
-  return id1.name === id2.name && id1.variety === id2.variety;
+  return id1.name === id2.name && id1.variant === id2.variant;
 }
 
 function findById(list: Word[], id: Id) {

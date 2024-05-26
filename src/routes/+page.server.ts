@@ -4,15 +4,15 @@ import { z } from 'zod';
 import type { Actions, PageServerLoad } from './$types';
 import { variants } from '$lib/words/types';
 import { fail } from '@sveltejs/kit';
-import type { Variety } from '$lib/words/types';
+import type { Variant } from '$lib/words/types';
 
 const words = createWords('db.json');
 
 export const load: PageServerLoad = async ({ cookies }) => {
   const c = cookies.get('load-word');
   if (c) {
-    const [name, variety] = c.split('|');
-    const word = await words.getById({ name, variety: variety as Variety });
+    const [name, variant] = c.split('|');
+    const word = await words.getById({ name, variant: variant as Variant });
     cookies.delete('load-word', { path: '/' });
     return { word };
   }
@@ -23,7 +23,7 @@ export const load: PageServerLoad = async ({ cookies }) => {
 const answerSchema = z.object({
   answer: z.string(),
   name: z.string(),
-  variety: z.enum(variants),
+  variant: z.enum(variants),
 });
 
 export const actions = {
@@ -32,7 +32,7 @@ export const actions = {
     const input = {
       answer: data.get('answer'),
       name: data.get('name'),
-      variety: data.get('variety'),
+      variant: data.get('variant'),
     };
     const parsed = answerSchema.safeParse(input);
     // parsuję tylko po to żeby pozbyć się nulli
@@ -41,10 +41,10 @@ export const actions = {
         fields: fieldsWithIssues(input, parsed.error?.issues ?? []),
       });
     }
-    const { name, variety, answer } = parsed.data;
-    const isGood = await words.answer({ name, variety }, answer);
+    const { name, variant, answer } = parsed.data;
+    const isGood = await words.answer({ name, variant }, answer);
     if (!isGood) {
-      cookies.set('load-word', [name, variety].join('|'), { path: '/' });
+      cookies.set('load-word', [name, variant].join('|'), { path: '/' });
       return {
         fields: fieldsCustom(input, {
           answer: 'Pudło! Spróbuj jeszcze raz',
