@@ -90,7 +90,7 @@ test('word for guessing based on sums', async () => {
       createdAt: '2024-05-13T22:00:00',
     },
   ]);
-  const word = await words.wordForGuessing();
+  const word = await words.wordForGuessing(() => 0);
   expect(word.name).toEqual('b');
 });
 
@@ -113,7 +113,7 @@ test('word for guessing based on empty last answer', async () => {
       createdAt: '2024-05-13T22:00:00',
     },
   ]);
-  const word = await words.wordForGuessing();
+  const word = await words.wordForGuessing(() => 0);
   expect(word.name).toEqual('a');
 });
 

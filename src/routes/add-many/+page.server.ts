@@ -1,41 +1,51 @@
-import { createWords, inputWordsComboSchema } from '$lib/words/words.server';
+import { createWords } from '$lib/words/words.server';
 import { fail } from '@sveltejs/kit';
 import type { Actions } from './$types';
-import { fieldsWithIssues } from '$lib/form';
+import { fieldsCustom, fieldsWithIssues } from '$lib/form';
+import { inputListoOfWordsComboSchema } from '$lib/words/types';
 
 const words = createWords('db.json');
 
 export const actions = {
   default: async ({ request }) => {
     const data = await request.formData();
-    const input = {
-      name: data.get('name'),
-      p1: data.get('p1'),
-      p2: data.get('p2'),
-      p3: data.get('p3'),
-      m1: data.get('m1'),
-      m2: data.get('m2'),
-      m3: data.get('m3'),
-    };
+    const dataObj = { text: data.get('text') };
+    const input =
+      data
+        .get('text')
+        ?.toString()
+        ?.split('\n')
+        .map((line) => {
+          const parts = line.split(',').map((s) => s.trim());
+          return {
+            name: parts[0],
+            p1: parts[1],
+            p2: parts[2],
+            p3: parts[3],
+            m1: parts[4],
+            m2: parts[5],
+            m3: parts[6],
+          };
+        }) ?? [];
 
-    const parsed = inputWordsComboSchema.safeParse(input);
+    const parsed = inputListoOfWordsComboSchema.safeParse(input);
     if (!parsed.success) {
       return fail(400, {
-        fields: fieldsWithIssues(input, parsed.error?.issues ?? []),
+        fields: fieldsCustom(dataObj, { text: 'Zły format danych' }),
       });
     }
 
     try {
-      await words.addCombo(parsed.data);
+      await words.addCombos(parsed.data);
     } catch (err) {
       console.error(err);
       return {
-        fields: fieldsWithIssues(input, []),
+        fields: fieldsWithIssues(dataObj, []),
         error: (err as Error).message,
       };
     }
     return {
-      fields: fieldsWithIssues(input, [], { empty: true }),
+      fields: fieldsWithIssues(dataObj, [], { empty: true }),
       success: true,
     };
   },

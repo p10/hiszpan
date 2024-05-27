@@ -1,7 +1,8 @@
-import { createWords, inputWordsComboSchema } from '$lib/words/words.server';
+import { createWords } from '$lib/words/words.server';
 import { fail } from '@sveltejs/kit';
 import type { Actions } from './$types';
 import { fieldsWithIssues } from '$lib/form';
+import { inputWordsComboSchema } from '$lib/words/types';
 
 const words = createWords('db.json');
 

@@ -19,7 +19,7 @@
     {/if}
 
     <form method="post">
-      <InputText {form} name="name" placeholder="po hiszpańsku" />
+      <InputText {form} name="name" placeholder="po hiszpańsku" focus />
       <div class="grid">
         <div><InputText {form} name="p1" placeholder="ja" /></div>
         <div><InputText {form} name="p2" placeholder="ty" /></div>

@@ -1,18 +1,32 @@
 <script lang="ts">
+  import type { HTMLTextareaAttributes } from 'svelte/elements';
   import type { Fields } from '../form';
+  import ErrorText from './error-text.svelte';
   type Props = {
     name: string;
     placeholder: string;
     form: { fields: Fields } | null;
+    focus?: boolean;
   };
-  const { name, placeholder, form }: Props = $props();
+  let elem: HTMLTextAreaElement;
+  const {
+    name,
+    placeholder,
+    form,
+    focus,
+    ...attrs
+  }: Props & Omit<HTMLTextareaAttributes, 'form'> = $props();
+  $effect(() => {
+    focus && elem.focus();
+  });
 </script>
 
 <textarea
-  {placeholder}
+  {...attrs}
+  bind:this={elem}
+  {name}
   value={form?.fields[name].value || ''}
+  {placeholder}
   aria-invalid={form?.fields[name].error ? 'true' : undefined}
 ></textarea>
-{#if form?.fields[name].error}
-  <small>{form?.fields[name].error}</small>
-{/if}
+<ErrorText {form} {name} />

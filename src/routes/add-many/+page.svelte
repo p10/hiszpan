@@ -1,11 +1,12 @@
 <script lang="ts">
-  import ErrorText from '$lib/ui/error-text.svelte';
+  import Textarea from '$lib/ui/textarea.svelte';
   import Top from '$lib/ui/top.svelte';
   import type { ActionData } from './$types';
-  export let form: ActionData;
+
+  const { form }: { form: ActionData } = $props();
 </script>
 
-<Top active="add" />
+<Top active="add-many" />
 
 <main class="container">
   <article>
@@ -19,9 +20,16 @@
     {/if}
 
     <form method="post">
-      <textarea>{form?.fields['text'].value ?? ''}</textarea>
-      <ErrorText {form} name="text" />
+      <Textarea
+        {form}
+        rows={10}
+        name="text"
+        placeholder="espanol, ja, ty, ona, my, wy, oni"
+      />
       <input type="submit" value="Dodaj" />
     </form>
+    {#if form}
+      <pre>{JSON.stringify(form, null, 2)}</pre>
+    {/if}
   </article>
 </main>

@@ -1,24 +1,9 @@
 import { fs } from 'zx';
-import { z } from 'zod';
-import type { Variant, Word } from './types';
-
-const MIN_MESSAGE = { message: 'Musi zawierać conajmniej 2 litery' };
+import type { InputWordsCombo, Variant, Word } from './types';
 
 type Data = {
   words: Word[];
 };
-
-export const inputWordsComboSchema = z.object({
-  name: z.string().min(2, MIN_MESSAGE),
-  p1: z.string().min(2, MIN_MESSAGE),
-  p2: z.string().min(2, MIN_MESSAGE),
-  p3: z.string().min(2, MIN_MESSAGE),
-  m1: z.string().min(2, MIN_MESSAGE),
-  m2: z.string().min(2, MIN_MESSAGE),
-  m3: z.string().min(2, MIN_MESSAGE),
-});
-
-type InputWordsCombo = z.infer<typeof inputWordsComboSchema>;
 
 type InputWord = {
   name: string;
@@ -51,25 +36,13 @@ function create(filename: string) {
   return {
     async addCombo(input: InputWordsCombo) {
       const data = await readFile(filename);
-      const newWords = Object.keys(input)
-        .filter((key) => key !== 'name')
-        .map<Word>((key) => {
-          // TODO: może guard który wywala błąd gdy string nie jest variantem?
-          return {
-            name: input.name,
-            variant: key as Variant,
-            value: input[key as Variant],
-            sumOfBad: 0,
-            sumOfGood: 0,
-            createdAt: dateToISOLikeButLocal(new Date()),
-          };
-        });
-      const someExists = newWords.some(
-        (word) => findById(data.words, word) !== undefined,
-      );
-      if (someExists) {
-        throw new Error(`Word "${input.name}" already exists`);
-      }
+      const newWords = prepareCombo(data, input);
+      await updateWords([...data.words, ...newWords]);
+    },
+
+    async addCombos(input: InputWordsCombo[]) {
+      const data = await readFile(filename);
+      const newWords = input.flatMap((i) => prepareCombo(data, i));
       await updateWords([...data.words, ...newWords]);
     },
 
@@ -171,6 +144,29 @@ function init(): Data {
   };
 }
 
+function prepareCombo(data: Data, input: InputWordsCombo) {
+  const newWords = Object.keys(input)
+    .filter((key) => key !== 'name')
+    .map<Word>((key) => {
+      // TODO: może guard który wywala błąd gdy string nie jest variantem?
+      return {
+        name: input.name,
+        variant: key as Variant,
+        value: input[key as Variant],
+        sumOfBad: 0,
+        sumOfGood: 0,
+        createdAt: dateToISOLikeButLocal(new Date()),
+      };
+    });
+  const someExists = newWords.some(
+    (word) => findById(data.words, word) !== undefined,
+  );
+  if (someExists) {
+    throw new Error(`Word "${input.name}" already exists`);
+  }
+  return newWords;
+}
+
 function sameId(id1: Id, id2: Id) {
   return id1.name === id2.name && id1.variant === id2.variant;
 }
@@ -194,7 +190,7 @@ async function readFile(filename: string): Promise<Data> {
 }
 
 async function saveFile(filename: string, data: Data) {
-  return fs.writeJson(filePath(filename), data);
+  return fs.writeJson(filePath(filename), data, { spaces: 2 });
 }
 
 function filePath(filename: string) {
