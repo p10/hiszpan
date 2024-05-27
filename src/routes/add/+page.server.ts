@@ -1,13 +1,10 @@
-import { createWords } from '$lib/words/words.server';
 import { fail } from '@sveltejs/kit';
 import type { Actions } from './$types';
 import { fieldsWithIssues } from '$lib/form';
 import { inputWordsComboSchema } from '$lib/words/types';
 
-const words = createWords('db.json');
-
 export const actions = {
-  default: async ({ request }) => {
+  default: async ({ request, locals }) => {
     const data = await request.formData();
     const input = {
       name: data.get('name'),
@@ -27,7 +24,7 @@ export const actions = {
     }
 
     try {
-      await words.addCombo(parsed.data);
+      await locals.words.addCombo(parsed.data);
     } catch (err) {
       console.error(err);
       return {

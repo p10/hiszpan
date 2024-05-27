@@ -3,10 +3,8 @@ import type { Word } from '../types';
 import { createWords } from '../words.server';
 import { fs } from 'zx';
 
-const filename = 'db-tests.json';
-const path = `${process.cwd()}/data/${filename}`;
-// let words: ReturnType<typeof createWords>;
-const words = createWords(filename);
+const path = `${process.cwd()}/data/db-tests.json`;
+const words = createWords(path);
 
 async function wordsFromFile() {
   const d = (await fs.readJson(path)) as { words: Word[] };

@@ -1,22 +1,22 @@
 import { fieldsCustom, fieldsWithIssues } from '$lib/form';
-import { createWords } from '$lib/words/words.server';
 import { z } from 'zod';
 import type { Actions, PageServerLoad } from './$types';
 import { variants } from '$lib/words/types';
 import { fail } from '@sveltejs/kit';
 import type { Variant } from '$lib/words/types';
 
-const words = createWords('db.json');
-
-export const load: PageServerLoad = async ({ cookies }) => {
+export const load: PageServerLoad = async ({ cookies, locals }) => {
   const c = cookies.get('load-word');
   if (c) {
     const [name, variant] = c.split('|');
-    const word = await words.getById({ name, variant: variant as Variant });
+    const word = await locals.words.getById({
+      name,
+      variant: variant as Variant,
+    });
     cookies.delete('load-word', { path: '/' });
     return { word };
   }
-  const word = await words.wordForGuessing((len) => {
+  const word = await locals.words.wordForGuessing((len) => {
     console.log(`random select form ${len} words`);
     return random(0, len - 1);
   });
@@ -30,7 +30,7 @@ const answerSchema = z.object({
 });
 
 export const actions = {
-  default: async ({ request, cookies }) => {
+  default: async ({ request, cookies, locals }) => {
     const data = await request.formData();
     const input = {
       answer: data.get('answer'),
@@ -45,7 +45,7 @@ export const actions = {
       });
     }
     const { name, variant, answer } = parsed.data;
-    const isGood = await words.answer({ name, variant }, answer);
+    const isGood = await locals.words.answer({ name, variant }, answer);
     if (!isGood) {
       cookies.set('load-word', [name, variant].join('|'), { path: '/' });
       return {

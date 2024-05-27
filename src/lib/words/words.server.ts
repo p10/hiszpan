@@ -13,21 +13,7 @@ type InputWord = {
 
 type Id = Pick<Word, 'name' | 'variant'>;
 
-type Instance = ReturnType<typeof create>;
-
-const instances = new Map<string, Instance>();
-
-export function createWords(filename: string): Instance {
-  const i = instances.get(filename);
-  if (!i) {
-    const words = create(filename);
-    instances.set(filename, words);
-    return words;
-  }
-  return i;
-}
-
-function create(filename: string) {
+export function createWords(filename: string) {
   async function updateWords(words: Word[]) {
     const data = await readFile(filename);
     await saveFile(filename, { ...data, words });
@@ -179,9 +165,9 @@ const lastAnswerTimestamp = (w: Word) =>
   w.lastAnswer?.date ? new Date(w.lastAnswer.date).getTime() : 0;
 
 async function readFile(filename: string): Promise<Data> {
-  await fs.ensureFile(filePath(filename));
+  await fs.ensureFile(filename);
   try {
-    return await fs.readJson(filePath(filename));
+    return await fs.readJson(filename);
   } catch (e) {
     const data = init();
     await saveFile(filename, data);
@@ -190,11 +176,7 @@ async function readFile(filename: string): Promise<Data> {
 }
 
 async function saveFile(filename: string, data: Data) {
-  return fs.writeJson(filePath(filename), data, { spaces: 2 });
-}
-
-function filePath(filename: string) {
-  return `${process.cwd()}/data/${filename}`;
+  return fs.writeJson(filename, data, { spaces: 2 });
 }
 
 // produces iso like format '2024-05-06T12:14:10' but for local time
