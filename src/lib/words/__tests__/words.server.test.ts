@@ -77,8 +77,8 @@ test('word for guessing based on sums', async () => {
       name: 'a',
       variant: 'p1',
       value: 'aa',
-      sumOfBad: 1,
-      sumOfGood: 0,
+      sumOfBad: 0,
+      sumOfGood: 1,
       createdAt: '2024-05-13T22:00:00',
     },
     {

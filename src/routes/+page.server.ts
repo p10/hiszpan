@@ -16,7 +16,10 @@ export const load: PageServerLoad = async ({ cookies }) => {
     cookies.delete('load-word', { path: '/' });
     return { word };
   }
-  const word = await words.wordForGuessing(() => 0);
+  const word = await words.wordForGuessing((len) => {
+    console.log(`random select form ${len} words`);
+    return random(0, len - 1);
+  });
   return { word };
 };
 
@@ -54,3 +57,7 @@ export const actions = {
     return { fields: fieldsWithIssues(input, [], { empty: true }) };
   },
 } satisfies Actions;
+
+function random(min: number, max: number) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}

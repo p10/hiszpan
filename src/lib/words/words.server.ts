@@ -124,7 +124,7 @@ function create(filename: string) {
         return 0;
       });
 
-      return words[select(lessPopularWords.length)];
+      return lessPopularWords[select(lessPopularWords.length)];
     },
 
     /**
