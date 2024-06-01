@@ -1,6 +1,5 @@
 # todo
-- [ ] createWord jest zle zaprojektowane
-    - nie możemy wczytywać danych tylko za pierwszym razem
+- [X] createWord jest zle zaprojektowane
 - [x] aktywy link w menu
-- [ ] lisita słówke na formularzu dodawania
+- [ ] lisita na formularzu dodawania
   - [ ] edycja słówka na liście
