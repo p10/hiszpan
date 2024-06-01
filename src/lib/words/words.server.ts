@@ -179,7 +179,7 @@ async function saveFile(filename: string, data: Data) {
   return fs.writeJson(filename, data, { spaces: 2 });
 }
 
-// produces iso like format '2024-05-06T12:14:10' but for local time
+// iso like format '2024-05-06T12:14:10' but for local time
 function dateToISOLikeButLocal(date: Date) {
   const offsetMs = date.getTimezoneOffset() * 60 * 1000;
   const msLocal = date.getTime() - offsetMs;
