@@ -28,8 +28,5 @@
       />
       <input type="submit" value="Dodaj" />
     </form>
-    {#if form}
-      <pre>{JSON.stringify(form, null, 2)}</pre>
-    {/if}
   </article>
 </main>
