@@ -17,6 +17,16 @@
 
 <main class="container">
   <article>
+    {#if form?.goodAnswer}
+      <p class="color-valid">Poprawnie! Teraz zgadnij natstępne</p>
+    {/if}
+    {#if form?.badAnswer}
+      <p class="color-invalid">
+        Pudło! Spróbuj jeszcze raz, lub <a href="/" data-sveltekit-reload
+          >wylosuj nowe słowo</a
+        >
+      </p>
+    {/if}
     {#if word}
       <header>
         <strong>{word.name}</strong> -
@@ -37,6 +47,8 @@
       <p>baza nie zawiera słów. Dodaj jakieś.</p>
     {/if}
   </article>
+  <pre>{JSON.stringify(word, null, 2)}</pre>
+  <pre>{JSON.stringify(form, null, 2)}</pre>
 </main>
 
 <style>

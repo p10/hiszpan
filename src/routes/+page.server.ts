@@ -55,11 +55,15 @@ export const actions = {
       cookies.set('load-word', [name, variant].join('|'), { path: '/' });
       return {
         fields: fieldsCustom(input, {
-          answer: 'Pudło! Spróbuj jeszcze raz',
+          answer: 'Niepoprawnie',
         }),
+        badAnswer: true,
       };
     }
-    return { fields: fieldsWithIssues(input, [], { empty: true }) };
+    return {
+      fields: fieldsWithIssues(input, [], { empty: true }),
+      goodAnswer: true,
+    };
   },
 } satisfies Actions;
 

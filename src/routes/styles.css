@@ -18,3 +18,7 @@ article > header {
 form > :last-child {
   margin-bottom: 0;
 }
+
+.container {
+  max-width: 1000px;
+}
