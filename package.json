@@ -1,9 +1,9 @@
 {
   "name": "hiszpan",
-  "version": "0.1.0",
+  "version": "0.0.1",
   "scripts": {
     "dev": "vite dev",
-    "start": "bun run build && bun ./build/index.js",
+    "start": "npm run build && node build",
     "build": "vite build",
     "preview": "vite preview",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
@@ -13,7 +13,7 @@
     "test": "vitest"
   },
   "devDependencies": {
-    "svelte-adapter-bun": "latest",
+    "@sveltejs/adapter-node": "^5.0.1",
     "@sveltejs/kit": "^2.0.0",
     "@sveltejs/vite-plugin-svelte": "^3.0.0",
     "@types/eslint": "^8.56.0",
