@@ -47,8 +47,6 @@
       <p>baza nie zawiera słów. Dodaj jakieś.</p>
     {/if}
   </article>
-  <pre>{JSON.stringify(word, null, 2)}</pre>
-  <pre>{JSON.stringify(form, null, 2)}</pre>
 </main>
 
 <style>
