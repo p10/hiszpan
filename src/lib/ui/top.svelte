@@ -11,7 +11,7 @@
       <li class:active={active === 'start'}><a href="/">Zgaduj</a></li>
       <li class:active={active === 'add'}><a href="/add">Dodaj</a></li>
       <li class:active={active === 'add-many'}>
-        <a href="/add-many">importuj</a>
+        <a href="/add-many">Importuj</a>
       </li>
     </ul>
   </nav>
