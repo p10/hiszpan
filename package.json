@@ -3,7 +3,8 @@
   "version": "0.0.1",
   "scripts": {
     "dev": "vite dev",
-    "start": "npm run build && node build",
+    "start": "npm run build && npm run start:server",
+    "start:server": "HOST=127.0.0.1 ORIGIN=http://localhost:3000 PORT=3000 node build",
     "build": "vite build",
     "preview": "vite preview",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
