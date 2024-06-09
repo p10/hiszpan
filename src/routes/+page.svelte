@@ -11,23 +11,31 @@
   const { data, form }: Props = $props();
 
   let { word } = data;
-  let label = variantLabel(word.variant);
 </script>
 
 <Top active="start" />
 
 <main class="container">
   <article>
-    <header>
-      <strong>{word.name}</strong> -
-      <small>{label}</small>
-    </header>
-    <form method="post">
-      <input type="hidden" name="name" value={word.name} />
-      <input type="hidden" name="variant" value={word.variant} />
-      <InputText {form} name="answer" placeholder={label} focus />
-      <input type="submit" value="Sprawdź" />
-    </form>
+    {#if word}
+      <header>
+        <strong>{word.name}</strong> -
+        <small>{variantLabel(word.variant)}</small>
+      </header>
+      <form method="post">
+        <input type="hidden" name="name" value={word.name} />
+        <input type="hidden" name="variant" value={word.variant} />
+        <InputText
+          {form}
+          name="answer"
+          placeholder={variantLabel(word.variant)}
+          focus
+        />
+        <input type="submit" value="Sprawdź" />
+      </form>
+    {:else}
+      <p>baza nie zawiera słów. Dodaj jakieś.</p>
+    {/if}
   </article>
 </main>
 

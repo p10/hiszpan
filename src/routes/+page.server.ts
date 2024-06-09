@@ -16,11 +16,16 @@ export const load: PageServerLoad = async ({ cookies, locals }) => {
     cookies.delete('load-word', { path: '/' });
     return { word };
   }
-  const word = await locals.words.wordForGuessing((len) => {
-    console.log(`random select form ${len} words`);
-    return random(0, len - 1);
-  });
-  return { word };
+  try {
+    const word = await locals.words.wordForGuessing((len) => {
+      console.log(`random select form ${len} words`);
+      return random(0, len - 1);
+    });
+    return { word };
+  } catch (e) {
+    console.error(e);
+    return { word: undefined };
+  }
 };
 
 const answerSchema = z.object({
