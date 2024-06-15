@@ -28,4 +28,8 @@ module.exports = {
       },
     },
   ],
+  rules: {
+    'svelte/valid-compile': 'off',
+    a11y_no_redundant_roles: 'off',
+  },
 };

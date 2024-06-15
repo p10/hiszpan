@@ -29,6 +29,14 @@ export function variantLabel(variant: Variant): string {
 
 const MIN_MESSAGE = { message: 'Musi zawierać conajmniej 2 litery' };
 
+export const inputWordSchema = z.object({
+  name: z.string().min(2, MIN_MESSAGE),
+  value: z.string().min(2, MIN_MESSAGE),
+  variant: z.enum(variants),
+});
+
+export type InputWord = z.infer<typeof inputWordSchema>;
+
 export const inputWordsComboSchema = z.object({
   name: z.string().min(2, MIN_MESSAGE),
   p1: z.string().min(2, MIN_MESSAGE),

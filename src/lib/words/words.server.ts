@@ -1,14 +1,8 @@
 import { fs } from 'zx';
-import type { InputWordsCombo, Variant, Word } from './types';
+import type { InputWord, InputWordsCombo, Variant, Word } from './types';
 
 type Data = {
   words: Word[];
-};
-
-type InputWord = {
-  name: string;
-  value: string;
-  variant: Variant;
 };
 
 type Id = Pick<Word, 'name' | 'variant'>;
@@ -30,6 +24,22 @@ export function createWords(filename: string) {
       const data = await readFile(filename);
       const newWords = input.flatMap((i) => prepareCombo(data, i));
       await updateWords([...data.words, ...newWords]);
+    },
+
+    async updateValue(input: InputWord) {
+      const data = await readFile(filename);
+      const word = findById(data.words, input);
+      if (word === undefined) {
+        throw new Error('word does not exists');
+      }
+      const updatedWord = {
+        ...word,
+        value: input.value,
+      };
+      await updateWords(
+        data.words.map((w) => (sameId(word, w) ? updatedWord : w)),
+      );
+      return updatedWord;
     },
 
     async add(input: InputWord) {
@@ -113,16 +123,34 @@ export function createWords(filename: string) {
       return lessPopularWords[select(lessPopularWords.length)];
     },
 
-    /**
-     * @deprecated
-     *  jeszcze nie jest używane
-     */
-    async list() {
-      const data = await readFile(filename);
-      return data.words;
+    async listCombos(): Promise<Combo[]> {
+      const { words } = await readFile(filename);
+      const groups = words.reduce<Record<string, Word[]>>((acc, word) => {
+        return {
+          ...acc,
+          [word.name]: [...(acc[word.name] || []), word],
+        };
+      }, {});
+
+      const combos = Object.entries(groups).map(([name, words]) => {
+        const wordsDict = words.reduce<Record<Variant, Word>>(
+          (acc, word) => {
+            return {
+              ...acc,
+              [word.variant]: word,
+            };
+          },
+          {} as Record<Variant, Word>,
+        );
+        return { name, ...wordsDict };
+      });
+
+      return combos;
     },
   };
 }
+
+type Combo = { name: string } & Record<Variant, Word>;
 
 function init(): Data {
   return {

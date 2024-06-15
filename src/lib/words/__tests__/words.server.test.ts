@@ -157,3 +157,35 @@ test('word for guessing based on last answer', async () => {
   const word = await words.wordForGuessing(() => 0);
   expect(word.name).toEqual('d');
 });
+
+test('update value', async () => {
+  await writeWords([
+    {
+      name: 'a',
+      variant: 'p1',
+      value: 'aa',
+      sumOfBad: 0,
+      sumOfGood: 0,
+      createdAt: '2024-05-13T22:00:00',
+    },
+    {
+      name: 'b',
+      variant: 'p1',
+      value: 'bb',
+      sumOfBad: 0,
+      sumOfGood: 0,
+      createdAt: '2024-05-13T22:00:00',
+    },
+  ]);
+
+  await words.updateValue({ name: 'a', variant: 'p1', value: 'updated' });
+
+  const w = await wordsFromFile();
+  expect(w[0].value).toEqual('updated');
+});
+
+test('updete value, but does not exits', async () => {
+  await expect(
+    words.updateValue({ name: 'a', variant: 'p1', value: 'updated' }),
+  ).rejects.toThrow();
+});

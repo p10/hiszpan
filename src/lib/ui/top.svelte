@@ -1,7 +1,5 @@
 <script lang="ts">
-  // import type { Snippet } from 'svelte';
-  // const { children }: { children?: Snippet } = $props();
-  type Active = 'start' | 'add' | 'add-many';
+  type Active = 'start' | 'add' | 'add-many' | 'edit';
   const { active }: { active: Active } = $props();
 </script>
 
@@ -13,6 +11,7 @@
       <li class:active={active === 'add-many'}>
         <a href="/add-many">Importuj</a>
       </li>
+      <li class:active={active === 'edit'}><a href="/edit">Edytuj</a></li>
     </ul>
   </nav>
 </header>

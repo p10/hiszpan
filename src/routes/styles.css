@@ -15,10 +15,28 @@ article > header {
   font-size: 1.2rem;
 }
 
-form > :last-child {
+form > :last-child,
+article > :last-child {
   margin-bottom: 0;
 }
 
 .container {
   max-width: 1000px;
+}
+
+dl {
+  display: grid;
+  grid-gap: 0.2rem 0.5rem;
+  grid-template-columns: max-content;
+  align-items: center;
+}
+dt {
+  font-weight: bold;
+}
+dt:after {
+  content: ':';
+}
+dd {
+  margin: 0;
+  grid-column-start: 2;
 }
