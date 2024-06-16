@@ -1,6 +1,6 @@
 import { fail } from '@sveltejs/kit';
 import type { Actions } from './$types';
-import { fieldsWithIssues } from '$lib/form';
+import { fields } from '$lib/form';
 import { inputWordsComboSchema } from '$lib/words/types';
 
 export const actions = {
@@ -19,7 +19,7 @@ export const actions = {
     const parsed = inputWordsComboSchema.safeParse(input);
     if (!parsed.success) {
       return fail(400, {
-        fields: fieldsWithIssues(input, parsed.error?.issues ?? []),
+        fields: fields(input, parsed.error?.issues ?? []),
       });
     }
 
@@ -28,12 +28,12 @@ export const actions = {
     } catch (err) {
       console.error(err);
       return {
-        fields: fieldsWithIssues(input, []),
+        fields: fields(input, []),
         error: (err as Error).message,
       };
     }
     return {
-      fields: fieldsWithIssues(input, [], { empty: true }),
+      fields: fields(input, [], { empty: true }),
       success: true,
     };
   },

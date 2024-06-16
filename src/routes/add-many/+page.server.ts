@@ -1,6 +1,6 @@
 import { fail } from '@sveltejs/kit';
 import type { Actions } from './$types';
-import { fieldsCustom, fieldsWithIssues } from '$lib/form';
+import { fields } from '$lib/form';
 import { inputListoOfWordsComboSchema } from '$lib/words/types';
 
 export const actions = {
@@ -28,7 +28,7 @@ export const actions = {
     const parsed = inputListoOfWordsComboSchema.safeParse(input);
     if (!parsed.success) {
       return fail(400, {
-        fields: fieldsCustom(dataObj, { text: 'Zły format danych' }),
+        fields: fields(dataObj, { text: 'Zły format danych' }),
       });
     }
 
@@ -37,12 +37,12 @@ export const actions = {
     } catch (err) {
       console.error(err);
       return {
-        fields: fieldsWithIssues(dataObj, []),
+        fields: fields(dataObj, []),
         error: (err as Error).message,
       };
     }
     return {
-      fields: fieldsWithIssues(dataObj, [], { empty: true }),
+      fields: fields(dataObj, [], { empty: true }),
       success: true,
     };
   },

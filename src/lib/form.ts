@@ -8,30 +8,20 @@ export type Fields = Record<
   }
 >;
 
-export function fieldsWithIssues(
+export function fields(
   input: Record<string, FormDataEntryValue | null>,
-  issues: ZodIssue[],
+  errorsOrIssues: Record<string, string> | ZodIssue[],
   options: { empty?: boolean } = {},
-): Fields {
-  const { empty } = { ...{ empty: false }, ...options };
-  return Object.keys(input).reduce<Fields>((acc, key) => {
-    const issue = issues.find((issue) => issue.path[0] === key);
-    return {
-      ...acc,
-      [key]: {
-        value: empty ? '' : input[key]?.toString() ?? '',
-        error: issue ? issue.message : undefined,
-      },
-    };
-  }, {});
-}
-
-export function fieldsCustom(
-  input: Record<string, FormDataEntryValue | null>,
-  errors: Record<string, string>,
-  options: { empty?: boolean } = {},
-): Fields {
-  const { empty } = { ...{ empty: false }, ...options };
+) {
+  const { empty } = { empty: false, ...options };
+  const errors = Array.isArray(errorsOrIssues)
+    ? errorsOrIssues.reduce<Record<string, string>>((acc, error) => {
+        return {
+          ...acc,
+          [error.path[0]]: error.message,
+        };
+      }, {})
+    : errorsOrIssues;
   return Object.keys(input).reduce<Fields>((acc, key) => {
     return {
       ...acc,

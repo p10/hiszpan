@@ -1,7 +1,7 @@
 import { inputWordSchema } from '$lib/words/types';
 import { fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
-import { fieldsWithIssues } from '$lib/form';
+import { fields } from '$lib/form';
 
 export const load: PageServerLoad = async ({ locals }) => {
   const words = await locals.words.listCombos();
@@ -20,7 +20,7 @@ export const actions = {
     const parsed = inputWordSchema.safeParse(input);
     if (!parsed.success) {
       return fail(400, {
-        fields: fieldsWithIssues(input, parsed.error?.issues ?? []),
+        fields: fields(input, parsed.error?.issues ?? []),
       });
     }
 
@@ -28,7 +28,7 @@ export const actions = {
     await locals.words.updateValue(parsed.data);
 
     return {
-      fields: fieldsWithIssues(input, [], { empty: true }),
+      fields: fields(input, [], { empty: true }),
       success: true,
     };
   },

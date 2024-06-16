@@ -1,4 +1,4 @@
-import { fieldsCustom, fieldsWithIssues } from '$lib/form';
+import { fields } from '$lib/form';
 import { z } from 'zod';
 import type { Actions, PageServerLoad } from './$types';
 import { variants } from '$lib/words/types';
@@ -46,7 +46,7 @@ export const actions = {
     // parsuję tylko po to żeby pozbyć się nulli
     if (!parsed.success) {
       return fail(400, {
-        fields: fieldsWithIssues(input, parsed.error?.issues ?? []),
+        fields: fields(input, parsed.error?.issues ?? []),
       });
     }
     const { name, variant, answer } = parsed.data;
@@ -54,14 +54,14 @@ export const actions = {
     if (!isGood) {
       cookies.set('load-word', [name, variant].join('|'), { path: '/' });
       return {
-        fields: fieldsCustom(input, {
+        fields: fields(input, {
           answer: 'Niepoprawnie',
         }),
         badAnswer: true,
       };
     }
     return {
-      fields: fieldsWithIssues(input, [], { empty: true }),
+      fields: fields(input, [], { empty: true }),
       goodAnswer: true,
     };
   },
