@@ -3,3 +3,5 @@
 - [x] aktywy link w menu
 - [ ] lisita na formularzu dodawania
   - [ ] edycja słówka na liście
+
+testowa zmiana pliku
