@@ -1,7 +1,6 @@
+It is a little app for my wife to help her learn spanish words
+
+
 # todo
-- [X] createWord jest zle zaprojektowane
-- [x] aktywy link w menu
 - [ ] lisita na formularzu dodawania
   - [ ] edycja słówka na liście
-
-testowa zmiana pliku
